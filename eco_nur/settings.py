@@ -34,7 +34,7 @@ LOGIN_REQUIRED_URLS_EXCEPTIONS = (
     r'/admin(.*)$',
     '/accounts/login/',
 )
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['localhost', '85.143.175.216']
 
 # Application definition
 
