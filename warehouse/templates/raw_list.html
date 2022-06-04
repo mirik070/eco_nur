@@ -1,0 +1,180 @@
+{% extends 'layout/base.html' %}
+{% load static humanize poll_extras %}
+
+{% block content %}
+    <!-- Page Sidebar Ends-->
+    <div class="page-body">
+        <div class="container-fluid">
+            <div class="page-header">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>Список сырья</h3>
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">Склады</li>
+                            <li class="breadcrumb-item"><a href="">Сырьевой склад</a></li>
+                        </ol>
+                    </div>
+                    <div class="col-md-6 text-end project-list">
+                        <a class="btn btn-info" type="button" data-bs-toggle="modal" data-bs-target="#CreateRawModal">
+                            <i data-feather="plus-square"> </i>
+                            Добавить сырьё
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Container-fluid starts-->
+        <div class="container-fluid">
+            <div class="row project-cards">
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="tab-content" id="top-tabContent">
+                                <div class="tab-pane fade show active" id="top-home" role="tabpanel"
+                                     aria-labelledby="top-home-tab">
+                                    <div class="row">
+                                        <div class="col-md-12 mt-3 mb-5">
+                                            <table class="table table-bordered table-inline-group">
+                                                <thead class="thead-dark">
+                                                <tr>
+                                                    <th scope="col">#</th>
+                                                    <th>Название</th>
+                                                    <th>Ед.изм</th>
+                                                    <th>Цена</th>
+                                                    <th>Статус</th>
+                                                    <th>Создано</th>
+                                                    <th>Возможности</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for raw in raws %}
+                                                    <tr>
+                                                        <td>#{{ forloop.counter }}</td>
+                                                        <td>{{ raw.title }}</td>
+                                                        <td>{{ raw.get_unit_display }}</td>
+                                                        <td>{{ raw.price|intcomma|remove_zero }}</td>
+                                                        <td>{{ raw.get_status_display }}</td>
+                                                        <td>{{ raw.created_at }}</td>
+                                                        <td>
+                                                            <button class="btn btn-secondary" type="button"
+                                                                    onclick="raw_modal_show('{{ raw.id }}', '{{ raw.title }}', '{{ raw.unit }}', '{{ raw.status }}', '{{ raw.price|remove_zero }}')">
+                                                                <i class="fa fa-pencil"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Container-fluid Ends-->
+
+    <!-- Modal -->
+    <div class="modal fade" id="CreateRawModal" tabindex="-1" aria-labelledby="CreateRawModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="CreateRawModalLabel">Добавить сырьё</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="id_form_create_raw" action="{% url 'warehouse_action' %}" method="post">
+                        <input type="hidden" name="action" value="create_raw">
+                        <input type="hidden" name="back_url" value="raw_list">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="">Название:</label>
+                                <input type="text" name="title" class="form-control">
+                            </div>
+                            <div class="col-md-12">
+                                <label for="">Цена:</label>
+                                <input type="number" step="any" name="price" class="form-control" value="0">
+                            </div>
+                            <div class="col-md-12">
+                                <label for="">Ед.изм:</label>
+                                <select name="unit" class="form-control">
+                                    <option value="piece">Шт</option>
+                                    <option value="kg">Кг</option>
+                                    <option value="liter">Литр</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="submit" form="id_form_create_raw" class="btn btn-primary">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="UpdateRawModal" tabindex="-1" aria-labelledby="UpdateRawModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="UpdateRawModalLabel">Изменить сырьё</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="id_form_update_raw" action="{% url 'warehouse_action' %}" method="post">
+                        <input type="hidden" name="action" value="update_raw">
+                        <input type="hidden" name="back_url" value="raw_list">
+                        <input type="hidden" name="raw_id" id="id_raw">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="">Название:</label>
+                                <input type="text" name="title" id="id_input_title" class="form-control">
+                            </div>
+                             <div class="col-md-12">
+                                <label for="">Цена:</label>
+                                <input type="number" step="any" name="price" id="id_input_price" class="form-control">
+                            </div>
+                            <div class="col-md-12">
+                                <label for="">Ед.изм:</label>
+                                <select name="unit" class="form-control" id="id_select_unit">
+                                    <option value="piece">Шт</option>
+                                    <option value="kg">Кг</option>
+                                    <option value="liter">Литр</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="">Статус:</label>
+                                <select name="status" class="form-control" id="id_select_status">
+                                    <option value="active">Активный</option>
+                                    <option value="deactive">Не активный</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="submit" form="id_form_update_raw" class="btn btn-primary">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block extra_js %}
+    <script>
+    function raw_modal_show(id, title, unit, status, price) {
+        $('#UpdateRawModal').modal('toggle')
+        $('#id_raw').val(id)
+        $('#id_input_title').val(title)
+        $('#id_select_unit').val(unit)
+        $('#id_select_status').val(status)
+        $('#id_input_price').val(price)
+    }
+    </script>
+{% endblock extra_js %}

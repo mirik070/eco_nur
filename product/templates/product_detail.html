@@ -1,0 +1,330 @@
+{% extends 'layout/base.html' %}
+{% load static humanize poll_extras humanize %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'assets/select2/css/select2.min.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Page Sidebar Ends-->
+<div class="page-body">
+    <div class="container-fluid">
+        <div class="page-header">
+            <div class="row">
+                <div class="col-sm-6">
+                    <h3>Детали продукта: {{ product.title }}</h3>
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Материалы</a></li>
+                        <li class="breadcrumb-item"><a href="/">Деталь продукта</a></li>
+                    </ol>
+                </div>
+                <div class="col-sm-6">
+                    <a href="{% url 'product_list' product.category_id %}" class="btn btn-info float-end">
+                        Назад
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Container-fluid starts-->
+    <div class="container-fluid">
+        <div class="row project-cards">
+            <div class="col-md-12 project-list">
+                <div class="card">
+                    <div class="row">
+                        <div class="col-md-12 p-0 mb-3">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h4>О продукте</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th>Название</th>
+                                        <th>Цвета</th>
+                                        <th>Статус</th>
+                                        <th>Ед.изм</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <td>{{ product.title }}</td>
+                                        <td>
+                                            {% for obj in product.productcolor_set.all %}
+                                                {{ obj.color|remove_zero }}{% if not forloop.last %},{% endif %}
+                                            {% endfor %}
+                                        </td>
+                                        <td>{{ product.get_status_display }}</td>
+                                        <td>{{ product.get_unit_display }}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row project-cards">
+            <div class="col-md-12 project-list">
+                <div class="card">
+                    <div class="row">
+                        <div class="col-md-12 p-0 mb-3">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h4>Размеры этого продукта</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th>Вес</th>
+                                        <th>Цена</th>
+                                        <th>Возможности</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for product_weight in product_weights %}
+                                        <tr>
+                                            <th scope="row">{{ forloop.counter }}</th>
+                                            <td>{{ product_weight.weight }} {{ product.get_unit_display }}</td>
+                                            <td>{{ product_weight.price|intcomma|remove_zero }}</td>
+                                            <td>
+                                                <form action="{% url 'product_action' %}" method="post">
+                                                    <input type="hidden" name="action"
+                                                           value="delete_product_weight">
+                                                    <input type="hidden" name="product_weight_id"
+                                                           value="{{ product_weight.id }}">
+                                                    <input type="hidden" name="product_id"
+                                                           value="{{ product.id }}">
+                                                    <button class="btn btn-danger btn-sm sharp"><i
+                                                            class="fa fa-trash"></i></button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    <tr>
+                                        <form action="{% url 'product_action' %}" class="row" method="post">
+                                            <input type="hidden" name="action" value="create_product_weight">
+                                            <input type="hidden" name="back_url" value="product_detail">
+                                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                                            <td>
+                                                #
+                                            </td>
+                                            <td>
+                                                <input type="number" step="any" required name="weight"
+                                                       class="form-control">
+                                            </td>
+                                            <td>
+                                                <input type="number" step="any" required name="price"
+                                                       class="form-control">
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-primary float-start" type="submit">
+                                                    Добавить
+                                                </button>
+                                            </td>
+                                        </form>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Container-fluid Ends-->
+
+<div class="modal fade" id="exampleModalfat" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel2">Удаление плана</h5>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <p>Если вы удалите этот план, пункты плана также будут удалены.</p>
+                    <p class="text-danger">Вы уверены, что хотите удалить это ?</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Отмена</button>
+                <button class="btn btn-danger object_delete_confirm_btn" type="button">Удалить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="estimate_item_delete_modal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel2">Удаление пункты плана</h5>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <p>Если вы удалите этот пункт плана, элементы пунктa также будут удалены.</p>
+                    <p class="text-danger">Вы уверены, что хотите удалить это ?</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Отмена</button>
+                <button class="btn btn-danger estimate_item_delete_confirm_btn" type="button">Удалить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="plan_item_item_delete_modal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel2">Удаление элементов плана</h5>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <p class="text-danger">Вы уверены, что хотите удалить это ?</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Отмена</button>
+                <button class="btn btn-danger plan_item_item_confirm_delete_btn" type="button">Удалить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade"
+     id="plan_create_modal" tabindex="-1" role="dialog"
+     aria-labelledby="plan_create_modal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Создать пункт для плана</h5>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="plan_create_form"
+                      action="" method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Закрыть</button>
+                <button form="plan_create_form" class="btn btn-primary" type="submit">Создать</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade"
+     id="plan_item_item_modal" tabindex="-1" role="dialog"
+     aria-labelledby="plan_create_modal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Создание нового элемента для пункта</h5>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="plan_item_item_modal_form" method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Закрыть</button>
+                <button class="btn btn-primary plan_item_item_modal_form" type="button">Создать</button>
+                <input form="plan_item_item_modal_form"
+                       type="submit" class="d-none plan_item_item_modal_form_submitter">
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+    <script src="{% static 'assets/select2/js/select2.min.js' %}"></script>
+    <script>
+        $(document).ready(function () {
+            $('.select2-ex').select2();
+        });
+
+        function income_item_calculate_total() {
+            let count = parseFloat($('#id_count').val())
+            let price = parseFloat($('#id_price').val())
+            let total = count * price
+            $('#id_total').val(total)
+        }
+
+        function change_income_status(status) {
+            $('#id_status').val(status)
+            $('#id_form_income_change_status').submit()
+        }
+
+        async function get_product_weight_and_color_info(url, data) {
+            let form_data = new FormData();
+            for (let key in data) {
+                form_data.append(key, data[key]);
+            }
+            const response = await fetch(url,
+                {
+                    method: 'POST',
+                    cache: "no-cache",
+                    body: form_data
+                }
+            )
+                .then(response => {
+                    return response.json();
+                })
+                .then((response_data) => {
+                    console.log(response_data)
+                    let select_product_weight = $('#id_product_weight')
+                    let select_product_color = $('#id_product_color')
+                    select_product_weight.children().remove().end()
+                    select_product_color.children().remove().end()
+                    let result_product_colors = response_data['results']['product_colors']
+                    let result_product_weights = response_data['results']['product_weights']
+                    for (let product_weight in result_product_weights) {
+                        select_product_weight.append('<option value=' + result_product_weights[product_weight]['id'] + '>' + result_product_weights[product_weight]['weight'] + '</option>');
+                    }
+                    for (let product_color in result_product_colors) {
+                        select_product_color.append('<option value=' + result_product_colors[product_color]['id'] + '>' + result_product_colors[product_color]['color'] + '</option>');
+                    }
+                })
+        }
+
+        function product_change_func(product_id) {
+            get_product_weight_and_color_info('{% url 'income_action' %}',
+                {
+                    'action': 'get_product_weight_and_color_info',
+                    'back_url': 'income_list',
+                    'product_id': product_id,
+                })
+        }
+    </script>
+{% endblock extra_js %}

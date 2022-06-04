@@ -1,0 +1,252 @@
+{% extends 'layout/base.html' %}
+{% load static humanize poll_extras %}
+
+{% block content %}
+    <!-- Page Sidebar Ends-->
+    <div class="page-body">
+        <div class="container-fluid">
+            <div class="page-header">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>Список продуктов: {{ category.title }}</h3>
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="#">Категория продуктов</a></li>
+                            <li class="breadcrumb-item"><a href="#">Продукты</a></li>
+                        </ol>
+                    </div>
+                    <div class="col-md-6 text-end project-list">
+                        <a href="{% url 'product_category_list' %}" class="btn btn-info">Назад</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Container-fluid starts-->
+        <div class="container-fluid">
+            <div class="row project-cards">
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="tab-content" id="top-tabContent">
+                                <div class="tab-pane fade show active" id="top-home" role="tabpanel"
+                                     aria-labelledby="top-home-tab">
+                                    <div class="row">
+                                    <div class="col-md-6"></div>
+                                    <div class="col-md-6 project-list">
+                                         <a class="btn btn-info float-end" type="button" data-bs-toggle="modal"
+                                               data-bs-target="#ProductCreateModal">
+                                                <i data-feather="plus-square"> </i>
+                                                Добавить продукт
+                                         </a>
+                                     </div>
+                                        <div class="col-md-12 mt-3 mb-5">
+                                            <table class="table table-bordered table-inline-group">
+                                                <thead class="thead-dark">
+                                                <tr>
+                                                    <th scope="col">#</th>
+                                                    <th>Название</th>
+                                                    <th>Размеры</th>
+                                                    <th>Цвета</th>
+                                                    <th>Статус</th>
+                                                    <th>Ед.изм</th>
+                                                    <th>Возможности</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for product in products %}
+                                                    <tr>
+                                                        <td>#{{ product.id }}</td>
+                                                        <td>{{ product.title }}</td>
+                                                        <td>
+                                                            {% for obj in product.productweight_set.all %}
+                                                                {{ obj.weight }}{% if not forloop.last %},{% endif %}
+                                                            {% endfor %}
+                                                        </td>
+                                                        <td>
+                                                            {% for obj in product.productcolor_set.all %}
+                                                                {{ obj.color|remove_zero }}{% if not forloop.last %},{% endif %}
+                                                            {% endfor %}
+                                                        </td>
+                                                        <td>{{ product.get_status_display }}</td>
+                                                        <td>{{ product.get_unit_display }}</td>
+                                                        <td>
+                                                            <button class="btn btn-secondary" type="button"
+                                                                    data-bs-toggle="modal"
+                                                                    data-bs-target="#ProductUpdateModal{{ product.id }}">
+                                                                <i class="fa fa-pencil"></i>
+                                                            </button>
+                                                            <a href="{% url 'product_detail' product.pk %}" class="btn btn-warning text-dark" type="button">
+                                                                <i class="fa fa-eye"></i>
+                                                            </a>
+
+                                                            <!-- Modal -->
+                                                            <div class="modal fade"
+                                                                 id="ProductUpdateModal{{ product.id }}"
+                                                                 tabindex="-1"
+                                                                 aria-labelledby="ProductUpdateModalLabel"
+                                                                 aria-hidden="true">
+                                                                <div class="modal-dialog">
+                                                                    <div class="modal-content">
+                                                                        <div class="modal-header">
+                                                                            <h5 class="modal-title"
+                                                                                id="ProductUpdateModalLabel">Изменить
+                                                                                продукт: {{ product.title }}</h5>
+                                                                            <button type="button" class="btn-close"
+                                                                                    data-bs-dismiss="modal"
+                                                                                    aria-label="Close"></button>
+                                                                        </div>
+                                                                        <div class="modal-body">
+                                                                            <form id="id_form_update_product_{{ product.id }}"
+                                                                                  action="{% url 'product_action' %}"
+                                                                                  method="post">
+                                                                                <input type="hidden" name="action"
+                                                                                       value="update_product">
+                                                                                <input type="hidden" name="category_id" value="{{ category.id }}">
+                                                                                <input type="hidden" name="product_id"
+                                                                                       value="{{ product.id }}">
+                                                                                <input type="hidden" name="back_url"
+                                                                                       value="product_list">
+                                                                                <div class="row">
+                                                                                    <div class="col-md-12">
+                                                                                        <label for="">Название:</label>
+                                                                                        <input type="text" name="title" class="form-control"
+                                                                                               value="{{ product.title }}">
+                                                                                    </div>
+                                                                                    <div class="col-md-12">
+                                                                                        <label for="">Цвета:</label>
+                                                                                        <select class="form-control selectColorsUpdate"
+                                                                                                style="width: 100%"
+                                                                                                name="color"
+                                                                                                multiple="multiple">
+                                                                                            {% with product.productcolor_set.all as colors %}
+                                                                                                {% if colors %}
+                                                                                                    {% for instance in colors %}
+                                                                                                        <option selected="selected">{{ instance.color }}</option>
+                                                                                                    {% endfor %}
+                                                                                                {% else %}
+                                                                                                    <option></option>
+                                                                                                {% endif %}
+                                                                                            {% endwith %}
+                                                                                        </select>
+                                                                                    </div>
+                                                                                    <div class="col-md-12">
+                                                                                        <label for="">Ед.изм:</label>
+                                                                                        <select name="unit" class="form-control">
+                                                                                            <option {% if product.unit == 'piece' %}selected{% endif %} value="piece">Шт</option>
+                                                                                            <option {% if product.unit == 'kg' %}selected{% endif %} value="kg">Кг</option>
+                                                                                            <option {% if product.unit == 'liter' %}selected{% endif %} value="liter">Литр</option>
+                                                                                        </select>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </form>
+                                                                        </div>
+                                                                        <div class="modal-footer">
+                                                                            <button type="button"
+                                                                                    class="btn btn-secondary"
+                                                                                    data-bs-dismiss="modal">Закрыть
+                                                                            </button>
+                                                                            <button type="submit"
+                                                                                    form="id_form_update_product_{{ product.id }}"
+                                                                                    class="btn btn-primary">Сохранить
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Container-fluid Ends-->
+
+    <!-- Modal -->
+    <div class="modal fade" id="ProductCreateModal" tabindex="-1" aria-labelledby="ProductCreateModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ProductCreateModalLabel">Добавить продукт</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="id_form_create_product" action="{% url 'product_action' %}" method="post">
+                        <input type="hidden" name="action" value="create_product">
+                        <input type="hidden" name="back_url" value="product_list">
+                        <input type="hidden" name="category_id" value="{{ category.id }}">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="">Название:</label>
+                                <input type="text" name="title" class="form-control">
+                            </div>
+                            <div class="col-md-12">
+                                <label for="">Цвета:</label>
+                                <select class="form-control selectColors" style="width: 100%" name="color"
+                                        multiple="multiple">
+                                    <option></option>
+                                </select>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="">Ед.изм:</label>
+                                <select name="unit" class="form-control">
+                                    <option value="piece">Шт</option>
+                                    <option value="kg">Кг</option>
+                                    <option value="liter">Литр</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="submit" form="id_form_create_product" class="btn btn-primary">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block extra_js %}
+    <script>
+
+        function select2_func(class_name, text) {
+             $(`.${class_name}`).select2({
+                placeholder: text,
+                tags: true,
+                tokenSeparators: [','],
+            });
+        }
+        {#function select2_func2(class_name, text) {#}
+        {#     $(`.${class_name}`).select2({#}
+        {#        placeholder: text,#}
+        {#        tags: true,#}
+        {#        templateSelection: (e) => {#}
+        {#            size_update_func(e)#}
+        {#            return e.text#}
+        {#            },#}
+        {#        tokenSeparators: [','],#}
+        {#    });#}
+        {# }#}
+
+        $(document).ready(function () {
+            {#select2_func2('selectSizes', 'Введите размеры через Enter или запятую')#}
+            {#select2_func('selectSizesUpdate', 'Введите размеры через Enter или запятую')#}
+            select2_func('selectColors', 'Введите цвета через Enter или запятую')
+            select2_func('selectColorsUpdate', 'Введите цвета через Enter или запятую')
+        });
+
+        function size_update_func(option) {
+            console.log(option)
+        }
+
+    </script>
+{% endblock extra_js %}

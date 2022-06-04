@@ -1,0 +1,177 @@
+{% extends 'layout/base.html' %}
+{% load static humanize poll_extras %}
+
+{% block content %}
+    <!-- Page Sidebar Ends-->
+    <div class="page-body">
+        <div class="container-fluid">
+            <div class="page-header">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>Список категории продуктов</h3>
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="#">Продукты</a></li>
+                        </ol>
+                    </div>
+                    <div class="col-md-6 text-end project-list">
+                        <a class="btn btn-info" type="button" data-bs-toggle="modal"
+                           data-bs-target="#ProductCategoryCreateModal">
+                            <i data-feather="plus-square"> </i>
+                            Добавить категорию
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Container-fluid starts-->
+        <div class="container-fluid">
+            <div class="row project-cards">
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="tab-content" id="top-tabContent">
+                                <div class="tab-pane fade show active" id="top-home" role="tabpanel"
+                                     aria-labelledby="top-home-tab">
+                                    <div class="row">
+                                        <div class="col-md-12 mt-3 mb-5">
+                                            <table class="table table-bordered table-inline-group">
+                                                <thead class="thead-dark">
+                                                <tr>
+                                                    <th scope="col">#</th>
+                                                    <th>Название</th>
+                                                    <th>Статус</th>
+                                                    <th>Возможности</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for product_category in product_categories %}
+                                                    <tr>
+                                                        <td>#{{ product_category.id }}</td>
+                                                        <td>{{ product_category.title }}</td>
+                                                        <td>{{ product_category.get_status_display }}</td>
+                                                        <td>
+                                                            <button class="btn btn-secondary" type="button"
+                                                                    data-bs-toggle="modal"
+                                                                    data-bs-target="#ProductCategoryUpdateModal{{ product_category.id }}">
+                                                                <i class="fa fa-pencil"></i>
+                                                            </button>
+                                                            <a href="{% url 'product_list' product_category.pk %}"
+                                                               class="btn btn-warning text-dark" type="button">
+                                                                <i class="fa fa-eye"></i>
+                                                            </a>
+
+                                                            <!-- Modal -->
+                                                            <div class="modal fade"
+                                                                 id="ProductCategoryUpdateModal{{ product_category.id }}"
+                                                                 tabindex="-1"
+                                                                 aria-labelledby="ProductUpdateModalLabel"
+                                                                 aria-hidden="true">
+                                                                <div class="modal-dialog">
+                                                                    <div class="modal-content">
+                                                                        <div class="modal-header">
+                                                                            <h5 class="modal-title"
+                                                                                id="ProductUpdateModalLabel">Изменить
+                                                                                продукт: {{ product_category.title }}</h5>
+                                                                            <button type="button" class="btn-close"
+                                                                                    data-bs-dismiss="modal"
+                                                                                    aria-label="Close"></button>
+                                                                        </div>
+                                                                        <div class="modal-body">
+                                                                            <form id="id_form_update_product_category_{{ product_category.id }}"
+                                                                                  action="{% url 'product_action' %}"
+                                                                                  method="post">
+                                                                                <input type="hidden" name="action"
+                                                                                       value="update_product_category">
+                                                                                <input type="hidden" name="product_category_id"
+                                                                                       value="{{ product_category.id }}">
+                                                                                <input type="hidden" name="back_url"
+                                                                                       value="product_category_list">
+                                                                                <div class="row">
+                                                                                    <div class="col-md-12">
+                                                                                        <label for="">Название:</label>
+                                                                                        <input type="text" name="title"
+                                                                                               class="form-control"
+                                                                                               value="{{ product_category.title }}">
+                                                                                    </div>
+                                                                                    <div class="col-md-12">
+                                                                                        <label for="">Статус:</label>
+                                                                                        <select name="status"
+                                                                                                class="form-control"
+                                                                                                id="id_select_status">
+                                                                                            <option {% if product_category.status == 'active' %}selected{% endif %} value="active">
+                                                                                                Активный
+                                                                                            </option>
+                                                                                            <option {% if product_category.status == 'deactive' %}selected{% endif %} value="deactive">Не
+                                                                                                активный
+                                                                                            </option>
+                                                                                        </select>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </form>
+                                                                        </div>
+                                                                        <div class="modal-footer">
+                                                                            <button type="button"
+                                                                                    class="btn btn-secondary"
+                                                                                    data-bs-dismiss="modal">Закрыть
+                                                                            </button>
+                                                                            <button type="submit"
+                                                                                    form="id_form_update_product_category_{{ product_category.id }}"
+                                                                                    class="btn btn-primary">Сохранить
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Container-fluid Ends-->
+
+    <!-- Modal -->
+    <div class="modal fade" id="ProductCategoryCreateModal" tabindex="-1" aria-labelledby="ProductCreateModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ProductCreateModalLabel">Добавить категорию</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="id_form_create_product" action="{% url 'product_action' %}" method="post">
+                        <input type="hidden" name="action" value="create_product_category">
+                        <input type="hidden" name="back_url" value="product_category_list">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="">Название:</label>
+                                <input type="text" name="title" class="form-control">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="submit" form="id_form_create_product" class="btn btn-primary">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block extra_js %}
+    <script>
+
+
+    </script>
+{% endblock extra_js %}

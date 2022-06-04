@@ -1,0 +1,378 @@
+{% extends 'layout/base.html' %}
+{% load static humanize poll_extras humanize %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'assets/select2/css/select2.min.css' %}">
+{% endblock %}
+
+{% block content %}
+    <!-- Page Sidebar Ends-->
+    <div class="page-body">
+        <div class="container-fluid">
+            <div class="page-header">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <h3>Детали прихода # {{ income.id }}</h3>
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/">Приходы</a></li>
+                            <li class="breadcrumb-item"><a href="/">Деталь прихода</a></li>
+                        </ol>
+                    </div>
+                    <div class="col-sm-6">
+                        <a href="{% url 'income_list' %}" class="btn btn-info float-end">
+                            Назад
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Container-fluid starts-->
+        <div class="container-fluid">
+            <div class="row project-cards">
+                <div class="col-md-12 project-list">
+                    <div class="card">
+                        <div class="row">
+                            <div class="col-md-12 p-0 mb-3">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h4>О приходе</h4>
+                                    </div>
+                                    <div class="col-md-6">
+                                        {% if income.status == 'created' %}
+                                            <form id="id_form_income_change_status" action="{% url 'income_action' %}"
+                                                  method="post">
+                                                <input type="hidden" name="action" value="change_income_status">
+                                                <input type="hidden" name="status" value="" id="id_status">
+                                                <input type="hidden" name="income_id" value="{{ income.id }}">
+                                                <button type="button" onclick="change_income_status('accepted')"
+                                                        class="btn btn-success">Принять
+                                                </button>
+                                                <button type="button" onclick="change_income_status('canceled')"
+                                                        class="btn btn-danger mx-2">Отменить
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                        <tr>
+                                            <th>Склад</th>
+                                            <th>Сумма</th>
+                                            <th>Статус</th>
+                                            <th>Контент</th>
+                                            <th>Создатель</th>
+                                            <th>Создано</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td>{{ income.get_warehouse_type_display }}</td>
+                                            <td>{{ income.total|intcomma }}</td>
+                                            <td>{{ income.get_status_display }}</td>
+                                            <td>{{ income.content }}</td>
+                                            <td>{{ income.user.fullname }}</td>
+                                            <td>{{ income.created_at|date:'H:i d.m.Y' }}</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row project-cards">
+                <div class="col-md-12 project-list">
+                    <div class="card">
+                        <div class="row">
+                            <div class="col-md-12 p-0 mb-3">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h4>Элементы прихода</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="table-responsive">
+                                    {% if income.warehouse_type == 'product' %}
+                                        <table class="table">
+                                            <thead>
+                                            <tr>
+                                                <th scope="col">#</th>
+                                                <th>Продукт</th>
+                                                <th>Вес</th>
+                                                <th>Цвет</th>
+                                                <th>Кол-во</th>
+                                                <th>Цена</th>
+                                                <th>Сумма</th>
+                                                <th>Комментарий</th>
+                                                <th>Возможности</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for income_product_item in income_product_items %}
+                                                <tr>
+                                                    <th scope="row">{{ forloop.counter }}</th>
+                                                    <td>{{ income_product_item.product }}</td>
+                                                    <td>{{ income_product_item.product_weight }} {{ income_product_item.product.get_unit_display }}</td>
+                                                    <td>{{ income_product_item.product_color }}</td>
+                                                    <td>{{ income_product_item.count|intcomma|remove_zero }}</td>
+                                                    <td>{{ income_product_item.price|intcomma|remove_zero }}</td>
+                                                    <td>{{ income_product_item.total|intcomma|remove_zero }}</td>
+                                                    <td>{{ income_product_item.content }}</td>
+                                                    <td>
+                                                        {% if request.user.is_superuser %}
+                                                            {% if income.status == 'created' %}
+                                                                <form action="{% url 'income_action' %}" method="post">
+                                                                    <input type="hidden" name="action"
+                                                                           value="delete_income_product_item">
+                                                                    <input type="hidden" name="income_product_item_id"
+                                                                           value="{{ income_product_item.id }}">
+                                                                    <input type="hidden" name="income_id"
+                                                                           value="{{ income.id }}">
+                                                                    <button class="btn btn-danger btn-sm sharp"><i
+                                                                            class="fa fa-trash"></i></button>
+                                                                </form>
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                            {% if income.status == 'created' %}
+                                                <tr>
+                                                    <form action="{% url 'income_action' %}" class="row" method="post">
+                                                        <input type="hidden" name="action"
+                                                               value="create_income_product_item">
+                                                        <input type="hidden" name="back_url" value="income_detail">
+                                                        <input type="hidden" name="income_id" value="{{ income.id }}">
+                                                        <td>
+                                                            #
+                                                        </td>
+                                                        <td>
+                                                            <select name="product" class="form-control select2-ex"
+                                                                    required onchange="product_change_func(this.value)">
+                                                                <option disabled selected value="None">---------------
+                                                                </option>
+                                                                {% for product in products %}
+                                                                    <option value="{{ product.id }}">{{ product.title }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <select name="product_weight"
+                                                                    class="form-control select2-ex"
+                                                                    id="id_product_weight" required
+                                                                    onchange="product_weight_change(this)">
+                                                                <option disabled selected value="None">---------------
+                                                                </option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <select name="product_color" class="form-control select2-ex"
+                                                                    id="id_product_color" required>
+                                                                <option disabled selected value="None">---------------
+                                                                </option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" id="id_count" required name="count"
+                                                                   onkeyup="income_item_calculate_total()"
+                                                                   class="form-control">
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" id="id_price" required name="price"
+                                                                   onkeyup="income_item_calculate_total()"
+                                                                   class="form-control">
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" id="id_total" readonly name="total"
+                                                                   class="form-control">
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" name="content" class="form-control">
+                                                        </td>
+                                                        <td>
+                                                            <button class="btn btn-primary float-start" type="submit">
+                                                                Добавить
+                                                            </button>
+                                                        </td>
+                                                    </form>
+                                                </tr>
+                                            {% endif %}
+                                            </tbody>
+                                        </table>
+                                    {% elif income.warehouse_type == 'raw' %}
+                                        <table class="table">
+                                            <thead>
+                                            <tr>
+                                                <th scope="col">#</th>
+                                                <th>Сырье</th>
+                                                <th>Кол-во</th>
+                                                <th>Цена</th>
+                                                <th>Сумма</th>
+                                                <th>Комментарий</th>
+                                                <th>Возможности</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for income_raw_item in income_raw_items %}
+                                                <tr>
+                                                    <th scope="row">{{ forloop.counter }}</th>
+                                                    <td>{{ income_raw_item.raw }}</td>
+                                                    <td>{{ income_raw_item.count|intcomma|remove_zero }}</td>
+                                                    <td>{{ income_raw_item.price|intcomma|remove_zero }}</td>
+                                                    <td>{{ income_raw_item.total|intcomma|remove_zero }}</td>
+                                                    <td>{{ income_raw_item.content }}</td>
+                                                    <td>
+                                                        {% if request.user.is_superuser %}
+                                                            {% if income.status == 'created' %}
+                                                                <form action="{% url 'income_action' %}" method="post">
+                                                                    <input type="hidden" name="action"
+                                                                           value="delete_income_raw_item">
+                                                                    <input type="hidden" name="income_raw_item_id"
+                                                                           value="{{ income_raw_item.id }}">
+                                                                    <input type="hidden" name="income_id"
+                                                                           value="{{ income.id }}">
+                                                                    <button class="btn btn-danger btn-sm sharp"><i
+                                                                            class="fa fa-trash"></i></button>
+                                                                </form>
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                            {% if income.status == 'created' %}
+                                                <tr>
+                                                    <form action="{% url 'income_action' %}" class="row" method="post">
+                                                        <input type="hidden" name="action"
+                                                               value="create_income_raw_item">
+                                                        <input type="hidden" name="back_url" value="income_detail">
+                                                        <input type="hidden" name="income_id" value="{{ income.id }}">
+                                                        <td>
+                                                            #
+                                                        </td>
+                                                        <td>
+                                                            <select name="raw" class="form-control select2-ex"
+                                                                    required onchange="product_weight_change(this)">
+                                                                <option disabled selected value="None">---------------
+                                                                </option>
+                                                                {% for raw in raws %}
+                                                                    <option value="{{ raw.id }}"
+                                                                            data-price="{{ raw.price|remove_zero }}">{{ raw.title }} {{ raw.get_unit_display }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" id="id_count" required name="count"
+                                                                   onkeyup="income_item_calculate_total()"
+                                                                   class="form-control">
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" id="id_price" required name="price"
+                                                                   onkeyup="income_item_calculate_total()"
+                                                                   class="form-control">
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" id="id_total" readonly name="total"
+                                                                   class="form-control">
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" name="content" class="form-control">
+                                                        </td>
+                                                        <td>
+                                                            <button class="btn btn-primary float-start" type="submit">
+                                                                Добавить
+                                                            </button>
+                                                        </td>
+                                                    </form>
+                                                </tr>
+                                            {% endif %}
+                                            </tbody>
+                                        </table>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Container-fluid Ends-->
+
+{% endblock content %}
+
+{% block extra_js %}
+    <script src="{% static 'assets/select2/js/select2.min.js' %}"></script>
+    <script>
+        $(document).ready(function () {
+            $('.select2-ex').select2();
+        });
+
+        function product_weight_change(select) {
+            let price = $('option:selected', select).attr('data-price');
+            $('#id_price').val(price)
+        }
+
+        function income_item_calculate_total() {
+            let count = parseFloat($('#id_count').val())
+            let price = parseFloat($('#id_price').val())
+            let total = count * price
+            $('#id_total').val(total)
+        }
+
+        function change_income_status(status) {
+            console.log('SS')
+            $('#id_status').val(status)
+            $('#id_form_income_change_status').submit()
+        }
+
+
+        async function get_product_weight_and_color_info(url, data) {
+            let form_data = new FormData();
+            for (let key in data) {
+                form_data.append(key, data[key]);
+            }
+            const response = await fetch(url,
+                {
+                    method: 'POST',
+                    cache: "no-cache",
+                    body: form_data
+                }
+            )
+                .then(response => {
+                    return response.json();
+                })
+                .then((response_data) => {
+                    console.log(response_data)
+                    let select_product_weight = $('#id_product_weight')
+                    let select_product_color = $('#id_product_color')
+                    select_product_weight.children().remove().end()
+                    select_product_color.children().remove().end()
+                    select_product_weight.append('<option disabled selected value="None">---------------</option>')
+                    select_product_color.append('<option disabled selected value="None">---------------</option>')
+                    let result_product_colors = response_data['results']['product_colors']
+                    let result_product_weights = response_data['results']['product_weights']
+                    for (let product_weight in result_product_weights) {
+                        select_product_weight.append(`<option value='${result_product_weights[product_weight]['id']}' data-price='${result_product_weights[product_weight]['price']}'>${result_product_weights[product_weight]['weight']} ${result_product_weights[product_weight]['unit']}</option>`);
+                    }
+                    for (let product_color in result_product_colors) {
+                        select_product_color.append(`<option value='${result_product_colors[product_color]['id']}'>${result_product_colors[product_color]['color']}</option>`);
+                    }
+                })
+        }
+
+        function product_change_func(product_id) {
+            get_product_weight_and_color_info('{% url 'income_action' %}',
+                {
+                    'action': 'get_product_weight_and_color_info',
+                    'back_url': 'income_list',
+                    'product_id': product_id,
+                })
+        }
+    </script>
+{% endblock extra_js %}

@@ -1,0 +1,284 @@
+{% extends 'layout/base.html' %}
+{% load static humanize poll_extras humanize %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'assets/select2/css/select2.min.css' %}">
+{% endblock %}
+
+{% block content %}
+    <!-- Page Sidebar Ends-->
+    <div class="page-body">
+        <div class="container-fluid">
+            <div class="page-header">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <h3>Детали заказа # {{ order.id }}</h3>
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'order_created_list' %}">Заказы</a></li>
+                            <li class="breadcrumb-item"><a href="/">Деталь заказа</a></li>
+                        </ol>
+                    </div>
+                    <div class="col-sm-6">
+                        <a href="{% url back_url %}" class="btn btn-info float-end">
+                            Назад
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Container-fluid starts-->
+        <div class="container-fluid">
+            <div class="row project-cards">
+                <div class="col-md-12 project-list">
+                    <div class="card">
+                        <div class="row">
+                            <div class="col-md-12 p-0 mb-3">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h4>О заказе</h4>
+                                    </div>
+                                    <div class="col-md-6">
+
+                                        <form id="id_form_order_change_status" action="{% url 'order_action' %}"
+                                              method="post">
+                                            <input type="hidden" name="action" value="change_order_status">
+                                            <input type="hidden" name="status" value="" id="id_status">
+                                            <input type="hidden" name="order_id" value="{{ order.id }}">
+                                            {% if order.status == 'created' %}
+                                                <button type="button" onclick="change_order_status('pending')"
+                                                        class="btn btn-success">Отправить
+                                                </button>
+                                            {% endif %}
+                                            {% if order.status == 'pending' %}
+                                                <button type="button" onclick="change_order_status('accepted')"
+                                                        class="btn btn-success">Принять
+                                                </button>
+                                                <button type="button" onclick="change_order_status('canceled')"
+                                                        class="btn btn-danger mx-2">Отменить
+                                                </button>
+                                            {% endif %}
+                                            {% if order.status == 'accepted' %}
+                                                  <button type="button" onclick="change_order_status('sent')"
+                                                        class="btn btn-success">Отправить клиенту
+                                                </button>
+                                            {% endif %}
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                        <tr>
+                                            <th>Агент</th>
+                                            <th>Адрес</th>
+                                            <th>Фото магазина</th>
+                                            <th>Название магазина</th>
+                                            <th>Номер телефона</th>
+                                            <th>Статус</th>
+                                            <th>Вид оплаты</th>
+                                            <th>Общая сумма</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td>{{ order.agent }}</td>
+                                            <td>{{ order.address }}</td>
+                                            <td>
+                                                {% if order.shop_photo %}
+                                                    <img class="img-fluid" style="height: 50px"
+                                                         src="{{ order.shop_photo.url }}" alt="">
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ order.shop_name }}</td>
+                                            <td>{{ order.phone }}</td>
+                                            <td>{{ order.get_status_display }}</td>
+                                            <td>{{ order.get_payment_type_display }}</td>
+                                            <td>{{ order.total|intcomma }}</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row project-cards">
+                <div class="col-md-12 project-list">
+                    <div class="card">
+                        <div class="row">
+                            <div class="col-md-12 p-0 mb-3">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h4>Элементы заказа</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th>Продукт</th>
+                                            <th>Вес</th>
+                                            <th>Цвет</th>
+                                            <th>Кол-во</th>
+                                            <th>Комментарий</th>
+                                            <th>Возможности</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for order_item in order_items %}
+                                            <tr>
+                                                <th scope="row">{{ forloop.counter }}</th>
+                                                <td>{{ order_item.product }}</td>
+                                                <td>{{ order_item.product_weight }} {{ order_item.product.get_unit_display }}</td>
+                                                <td>{{ order_item.product_color }}</td>
+                                                <td>{{ order_item.count|intcomma|remove_zero }}</td>
+                                                <td>{{ order_item.content }}</td>
+                                                <td>
+                                                    {% if order.status == 'created' %}
+                                                        <form action="{% url 'order_action' %}" method="post">
+                                                            <input type="hidden" name="action"
+                                                                   value="delete_order_item">
+                                                            <input type="hidden" name="order_item_id"
+                                                                   value="{{ order_item.id }}">
+                                                            <input type="hidden" name="order_id"
+                                                                   value="{{ order.id }}">
+                                                            <button class="btn btn-danger btn-sm sharp"><i
+                                                                    class="fa fa-trash"></i></button>
+                                                        </form>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        {% if order.status == 'created' %}
+                                            <tr>
+                                                <form action="{% url 'order_action' %}" class="row" method="post">
+                                                    <input type="hidden" name="action"
+                                                           value="create_order_item">
+                                                    <input type="hidden" name="back_url" value="order_detail">
+                                                    <input type="hidden" name="order_id" value="{{ order.id }}">
+                                                    <td>
+                                                        #
+                                                    </td>
+                                                    <td>
+                                                        <select name="product" class="form-control select2-ex"
+                                                                required onchange="product_change_func(this.value)">
+                                                            <option disabled selected value="None">---------------
+                                                            </option>
+                                                            {% for product in products %}
+                                                                <option value="{{ product.id }}">{{ product.title }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select name="product_weight"
+                                                                class="form-control select2-ex"
+                                                                id="id_product_weight" required
+                                                                onchange="product_weight_change(this)">
+                                                            <option disabled selected value="None">---------------
+                                                            </option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select name="product_color" class="form-control select2-ex"
+                                                                id="id_product_color" required>
+                                                            <option disabled selected value="None">---------------
+                                                            </option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" id="id_count" required name="count"
+                                                               class="form-control">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="content" class="form-control">
+                                                    </td>
+                                                    <td>
+                                                        <button class="btn btn-primary float-start" type="submit">
+                                                            Добавить
+                                                        </button>
+                                                    </td>
+                                                </form>
+                                            </tr>
+                                        {% endif %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Container-fluid Ends-->
+
+{% endblock content %}
+
+{% block extra_js %}
+    <script src="{% static 'assets/select2/js/select2.min.js' %}"></script>
+    <script>
+        $(document).ready(function () {
+            $('.select2-ex').select2();
+        });
+
+        function product_weight_change(select) {
+            let price = $('option:selected', select).attr('data-price');
+            $('#id_price').val(price)
+        }
+
+        function change_order_status(status) {
+            $('#id_status').val(status)
+            $('#id_form_order_change_status').submit()
+        }
+
+
+        async function get_product_weight_and_color_info(url, data) {
+            let form_data = new FormData();
+            for (let key in data) {
+                form_data.append(key, data[key]);
+            }
+            const response = await fetch(url,
+                {
+                    method: 'POST',
+                    cache: "no-cache",
+                    body: form_data
+                }
+            )
+                .then(response => {
+                    return response.json();
+                })
+                .then((response_data) => {
+                    console.log(response_data)
+                    let select_product_weight = $('#id_product_weight')
+                    let select_product_color = $('#id_product_color')
+                    select_product_weight.children().remove().end()
+                    select_product_color.children().remove().end()
+                    select_product_weight.append('<option disabled selected value="None">---------------</option>')
+                    select_product_color.append('<option disabled selected value="None">---------------</option>')
+                    let result_product_colors = response_data['results']['product_colors']
+                    let result_product_weights = response_data['results']['product_weights']
+                    for (let product_weight in result_product_weights) {
+                        select_product_weight.append(`<option value='${result_product_weights[product_weight]['id']}' data-price='${result_product_weights[product_weight]['price']}'>${result_product_weights[product_weight]['weight']} ${result_product_weights[product_weight]['unit']}</option>`);
+                    }
+                    for (let product_color in result_product_colors) {
+                        select_product_color.append(`<option value='${result_product_colors[product_color]['id']}'>${result_product_colors[product_color]['color']}</option>`);
+                    }
+                })
+        }
+
+        function product_change_func(product_id) {
+            get_product_weight_and_color_info('{% url 'income_action' %}',
+                {
+                    'action': 'get_product_weight_and_color_info',
+                    'back_url': 'income_list',
+                    'product_id': product_id,
+                })
+        }
+    </script>
+{% endblock extra_js %}

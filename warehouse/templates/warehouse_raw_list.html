@@ -1,0 +1,75 @@
+{% extends 'layout/base.html' %}
+{% load static humanize poll_extras %}
+
+{% block content %}
+    <!-- Page Sidebar Ends-->
+    <div class="page-body">
+        <div class="container-fluid">
+            <div class="page-header">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>Список сырья в складе</h3>
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">Сырьевой склад</li>
+                        </ol>
+                    </div>
+                    <div class="col-md-6 text-end project-list">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Container-fluid starts-->
+        <div class="container-fluid">
+            <div class="row project-cards">
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="tab-content" id="top-tabContent">
+                                <div class="tab-pane fade show active" id="top-home" role="tabpanel"
+                                     aria-labelledby="top-home-tab">
+                                    <div class="row">
+                                        <div class="col-md-12 mt-3 mb-5">
+                                            <table class="table table-bordered table-inline-group">
+                                                <thead class="thead-dark">
+                                                <tr>
+                                                    <th scope="col">#</th>
+                                                    <th>Сырье</th>
+                                                    <th>Ед.изм</th>
+                                                    <th>Цена</th>
+                                                    <th>Кол-во</th>
+                                                    <th>Создано</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for warehouse_raw in warehouse_raws %}
+                                                    <tr>
+                                                        <td>#{{ forloop.counter }}</td>
+                                                        <td>{{ warehouse_raw.raw.title }}</td>
+                                                        <td>{{ warehouse_raw.raw.get_unit_display }}</td>
+                                                        <td>{{ warehouse_raw.raw.price|intcomma|remove_zero }}</td>
+                                                        <td>{{ warehouse_raw.count|intcomma|remove_zero }}</td>
+                                                        <td>{{ warehouse_raw.created_at }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Container-fluid Ends-->
+
+{% endblock content %}
+
+{% block extra_js %}
+    <script>
+
+    </script>
+{% endblock extra_js %}

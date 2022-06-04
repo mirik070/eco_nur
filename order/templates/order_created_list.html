@@ -1,0 +1,146 @@
+{% extends 'layout/base.html' %}
+{% load static humanize poll_extras %}
+
+{% block content %}
+    <!-- Page Sidebar Ends-->
+    <div class="page-body">
+        <div class="container-fluid">
+            <div class="page-header">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>Список заказов</h3>
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="#">Заказы</a></li>
+                        </ol>
+                    </div>
+                    <div class="col-md-6 text-end project-list">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Container-fluid starts-->
+        <div class="container-fluid">
+            <div class="row project-cards">
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="tab-content" id="top-tabContent">
+                                <div class="tab-pane fade show active" id="top-home" role="tabpanel"
+                                     aria-labelledby="top-home-tab">
+                                    <div class="row">
+                                        <div class="col-md-6"></div>
+                                        <div class="col-md-6 project-list">
+                                            <a class="btn btn-info float-end" type="button" data-bs-toggle="modal"
+                                               data-bs-target="#OrderCreateModal">
+                                                <i data-feather="plus-square"> </i>
+                                                Добавить заказ
+                                            </a>
+                                        </div>
+                                        <div class="col-md-12 mt-3 mb-5">
+                                            <table class="table table-bordered table-inline-group">
+                                                <thead class="thead-dark">
+                                                <tr>
+                                                    <th scope="col">#</th>
+                                                    <th>Агент</th>
+                                                    <th>Адрес</th>
+                                                    <th>Фото магазина</th>
+                                                    <th>Название магазина</th>
+                                                    <th>Номер телефона</th>
+                                                    <th>Статус</th>
+                                                    <th>Вид оплаты</th>
+                                                    <th>Общая сумма</th>
+                                                    <th>Возможности</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for order in orders %}
+                                                    <tr>
+                                                        <td>#{{ order.id }}</td>
+                                                        <td>{{ order.agent }}</td>
+                                                        <td>{{ order.address }}</td>
+                                                        <td>
+                                                            {% if order.shop_photo %}
+                                                                <img class="img-fluid" style="height: 50px" src="{{ order.shop_photo.url }}" alt="">
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>{{ order.shop_name }}</td>
+                                                        <td>{{ order.phone }}</td>
+                                                        <td>{{ order.get_status_display }}</td>
+                                                        <td>{{ order.get_payment_type_display }}</td>
+                                                        <td>{{ order.total|intcomma }}</td>
+                                                        <td>
+                                                             <a class="btn btn-warning text-dark" href="{% url 'order_detail' order.pk %}">
+                                                                <i class="fa fa-eye"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Container-fluid Ends-->
+
+    <!-- Modal -->
+    <div class="modal fade" id="OrderCreateModal" tabindex="-1" aria-labelledby="OrderCreateModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="OrderCreateModalLabel">Добавить заказ</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form enctype="multipart/form-data" id="id_form_create_order" action="{% url 'order_action' %}" method="post">
+                        <input type="hidden" name="action" value="create_order">
+                        <input type="hidden" name="back_url" value="order_detail">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="">Адрес:</label>
+                                <input type="text" name="address" class="form-control">
+                            </div>
+                            <div class="col-md-12">
+                                <label for="">Фото магазина:</label>
+                                <input type="file" name="shop_photo" class="form-control">
+                            </div>
+                            <div class="col-md-12">
+                                <label for="">Название магазина:</label>
+                                <input type="text" name="shop_name" class="form-control">
+                            </div>
+                            <div class="col-md-12">
+                                <label for="">Номер телефона:</label>
+                                <input type="text" name="phone" class="form-control">
+                            </div>
+                            <div class="col-md-12">
+                                <label for="">Вид оплаты:</label>
+                                <select name="payment_type" class="form-control">
+                                    <option value="cash">Наличное</option>
+                                    <option value="enumeration">Перечисление</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="submit" form="id_form_create_order" class="btn btn-primary">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block extra_js %}
+    <script>
+
+    </script>
+{% endblock extra_js %}

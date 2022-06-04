@@ -1,0 +1,112 @@
+{% extends 'layout/base.html' %}
+{% load static humanize poll_extras %}
+
+{% block content %}
+    <!-- Page Sidebar Ends-->
+    <div class="page-body">
+        <div class="container-fluid">
+            <div class="page-header">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>Список приходов</h3>
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="">Приходы</a></li>
+                        </ol>
+                    </div>
+                    <div class="col-md-6 text-end project-list">
+                        <a class="btn btn-info" type="button" data-bs-toggle="modal" data-bs-target="#IncomeModal">
+                            <i data-feather="plus-square"> </i>
+                            Добавить приход
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Container-fluid starts-->
+        <div class="container-fluid">
+            <div class="row project-cards">
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="tab-content" id="top-tabContent">
+                                <div class="tab-pane fade show active" id="top-home" role="tabpanel"
+                                     aria-labelledby="top-home-tab">
+                                    <div class="row">
+                                        <div class="col-md-12 mt-3 mb-5">
+                                            <table class="table table-bordered table-inline-group">
+                                                <thead class="thead-dark">
+                                                <tr>
+                                                    <th scope="col">#</th>
+                                                    <th>Создал</th>
+                                                    <th>Тип склада</th>
+                                                    <th>Общяя сумма</th>
+                                                    <th>Статус</th>
+                                                    <th>Создано</th>
+                                                    <th>Возможности</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for income in incomes %}
+                                                    <tr>
+                                                        <td>#{{ income.id }}</td>
+                                                        <td>{{ income.user }}</td>
+                                                        <td>{{ income.get_warehouse_type_display }}</td>
+                                                        <td>{{ income.total|intcomma }}</td>
+                                                        <td>{{ income.get_status_display }}</td>
+                                                        <td>{{ income.created_at }}</td>
+                                                        <td>
+                                                            <a class="btn btn-info" href="{% url 'income_detail' income.pk %}">
+                                                                <i class="fa fa-eye"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Container-fluid Ends-->
+
+    <!-- Modal -->
+    <div class="modal fade" id="IncomeModal" tabindex="-1" aria-labelledby="IncomeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="IncomeModalLabel">Добавить приход</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="id_form_income" action="{% url 'income_action' %}" method="post">
+                        <input type="hidden" name="action" value="create_income">
+                        <input type="hidden" name="back_url" value="income_detail">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="">Склад:</label>
+                                <select name="warehouse_type" class="form-control">
+                                    <option value="product">Продуктовый</option>
+                                    <option value="raw">Сырьевой</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="">Контент:</label>
+                                <textarea class="form-control" name="content" cols="30" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="submit" form="id_form_income" class="btn btn-primary">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
