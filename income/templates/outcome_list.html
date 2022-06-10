@@ -8,7 +8,7 @@
             <div class="page-header">
                 <div class="row">
                     <div class="col-md-6">
-                        <h3>Список приходов</h3>
+                        <h3>Список расходов</h3>
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="">Приходы</a></li>
                         </ol>
@@ -16,7 +16,7 @@
                     <div class="col-md-6 text-end project-list">
                         <a class="btn btn-info" type="button" data-bs-toggle="modal" data-bs-target="#IncomeModal">
                             <i data-feather="plus-square"> </i>
-                            Добавить приход
+                            Добавить Расход
                         </a>
                     </div>
                 </div>
@@ -80,19 +80,18 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="IncomeModalLabel">Добавить приход</h5>
+                    <h5 class="modal-title" id="IncomeModalLabel">Добавить расход</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form id="id_form_income" action="{% url 'income_action' %}" method="post">
                         <input type="hidden" name="action" value="create_income">
                         <input type="hidden" name="back_url" value="income_detail">
-                        <input type="hidden" name="income_type" value="income">
+                        <input type="hidden" name="income_type" value="outcome">
                         <div class="row">
                             <div class="col-md-12">
                                 <label for="">Склад:</label>
                                 <select name="warehouse_type" class="form-control">
-                                    <option value="product">Продуктовый</option>
                                     <option value="raw">Сырьевой</option>
                                 </select>
                             </div>

@@ -78,6 +78,7 @@
                                             <th>Статус</th>
                                             <th>Вид оплаты</th>
                                             <th>Общая сумма</th>
+                                            <th>Создано</th>
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -95,6 +96,7 @@
                                             <td>{{ order.get_status_display }}</td>
                                             <td>{{ order.get_payment_type_display }}</td>
                                             <td>{{ order.total|intcomma }}</td>
+                                            <td>{{ order.created_at }}</td>
                                         </tr>
                                         </tbody>
                                     </table>
@@ -167,11 +169,11 @@
                                                     </td>
                                                     <td>
                                                         <select name="product" class="form-control select2-ex"
-                                                                required onchange="product_change_func(this.value)">
+                                                                required onchange="product_change_func(this)">
                                                             <option disabled selected value="None">---------------
                                                             </option>
                                                             {% for product in products %}
-                                                                <option value="{{ product.id }}">{{ product.title }}</option>
+                                                                <option value="{{ product.id }}" data-count="{{ product.count|remove_zero }}">{{ product.title }} | {{ product.count|remove_zero }}шт.</option>
                                                             {% endfor %}
                                                         </select>
                                                     </td>
@@ -272,12 +274,14 @@
                 })
         }
 
-        function product_change_func(product_id) {
+        function product_change_func(select) {
+            let count = $('option:selected', select).attr('data-count');
+            $('#id_count').attr('max', count)
             get_product_weight_and_color_info('{% url 'income_action' %}',
                 {
                     'action': 'get_product_weight_and_color_info',
                     'back_url': 'income_list',
-                    'product_id': product_id,
+                    'product_id': select.value,
                 })
         }
     </script>

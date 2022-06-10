@@ -50,6 +50,7 @@
                                                     <th>Статус</th>
                                                     <th>Вид оплаты</th>
                                                     <th>Общая сумма</th>
+                                                    <th>Создано</th>
                                                     <th>Возможности</th>
                                                 </tr>
                                                 </thead>
@@ -69,6 +70,7 @@
                                                         <td>{{ order.get_status_display }}</td>
                                                         <td>{{ order.get_payment_type_display }}</td>
                                                         <td>{{ order.total|intcomma }}</td>
+                                                        <td>{{ order.created_at }}</td>
                                                         <td>
                                                              <a class="btn btn-warning text-dark" href="{% url 'order_detail' order.pk %}">
                                                                 <i class="fa fa-eye"></i>
@@ -125,6 +127,13 @@
                                 <select name="payment_type" class="form-control">
                                     <option value="cash">Наличное</option>
                                     <option value="enumeration">Перечисление</option>
+                                </select>
+                            </div>
+                             <div class="col-md-12">
+                                <label for="">Тип платежа:</label>
+                                <select name="payment_type" class="form-control">
+                                    <option value="cash">Нахт</option>
+                                    <option value="duty">Долг</option>
                                 </select>
                             </div>
                         </div>

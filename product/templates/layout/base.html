@@ -196,7 +196,7 @@
                                     </ul>
                                 </li>
                             {% endif %}
-                            {% if request.user.is_superuser %}
+                            {% if request.user.is_superuser or request.user.user_type == 'raw_warehouse_manager'  %}
                                 <li class="dropdown">
                                     <a class="nav-link menu-title" href="javascript:void(0)">
                                         <i data-feather="airplay"></i>
@@ -205,18 +205,20 @@
                                     <ul class="nav-submenu menu-content">
 
                                         <li><a href="{% url 'income_list' %}">Список приходов</a></li>
+                                        <li><a href="{% url 'outcome_list' %}">Список расходов</a></li>
                                     </ul>
                                 </li>
                             {% endif %}
-                            {% if request.user.is_superuser %}
+                            {% if request.user.is_superuser or request.user.user_type == 'raw_warehouse_manager' %}
                                 <li class="dropdown">
                                     <a class="nav-link menu-title" href="javascript:void(0)">
                                         <i data-feather="home"></i>
                                         <span>Сырьевой склад</span>
                                     </a>
                                     <ul class="nav-submenu menu-content">
-
-                                        <li><a href="{% url 'raw_list' %}">Список сырья</a></li>
+                                        {% if request.user.is_superuser %}
+                                            <li><a href="{% url 'raw_list' %}">Список сырья</a></li>
+                                        {% endif %}
                                         <li><a href="{% url 'warehouse_raw_list' %}">Сырьевой склад</a></li>
                                     </ul>
                                 </li>

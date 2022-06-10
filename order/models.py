@@ -15,6 +15,10 @@ class Order(models.Model):
         cash = 'cash', 'Наличное'
         enumeration = 'enumeration', 'Перечисление'
 
+    class OrderMoneyType(models.TextChoices):
+        cash = 'cash', 'Нахт'
+        duty = 'duty', 'Долг'
+
     agent = models.ForeignKey(User,
                               on_delete=models.CASCADE,
                               verbose_name='Агент')
@@ -32,6 +36,10 @@ class Order(models.Model):
     payment_type = models.CharField(max_length=255,
                                     verbose_name='Вид оплаты',
                                     choices=PaymentType.choices)
+    money_type = models.CharField(max_length=255,
+                                  verbose_name='Тип платежа',
+                                  choices=OrderMoneyType.choices,
+                                  null=True)
     total = models.FloatField(verbose_name='Общая сумма', default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 

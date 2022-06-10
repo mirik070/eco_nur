@@ -17,7 +17,16 @@ class IncomeListView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(IncomeListView, self).get_context_data(**kwargs)
-        context['incomes'] = Income.objects.select_related('user')
+        context['incomes'] = Income.objects.filter(income_type='income').select_related('user')
+        return context
+
+
+class OutcomeListView(TemplateView):
+    template_name = 'outcome_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(OutcomeListView, self).get_context_data(**kwargs)
+        context['incomes'] = Income.objects.filter(income_type='outcome').select_related('user')
         return context
 
 

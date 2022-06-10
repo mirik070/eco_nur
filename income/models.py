@@ -7,6 +7,10 @@ class Income(models.Model):
         accepted = 'accepted', 'Принято'
         canceled = 'canceled', 'Отменено'
 
+    class IncomeType(models.TextChoices):
+        income = 'income', 'Приход'
+        outcome = 'outcome', 'Расход'
+
     class Warehouse(models.TextChoices):
         product = 'product', 'Продуктовый'
         raw = 'raw', 'Сырьевой'
@@ -20,6 +24,10 @@ class Income(models.Model):
                               verbose_name='Статус',
                               max_length=255,
                               default=Status.created)
+    income_type = models.CharField(max_length=255,
+                                   verbose_name='Тип',
+                                   choices=IncomeType.choices,
+                                   default=IncomeType.income)
     warehouse_type = models.CharField(max_length=255,
                                       verbose_name='Тип склада',
                                       choices=Warehouse.choices)

@@ -9,7 +9,8 @@ from warehouse.models import WarehouseProduct, WarehouseRaw
 def create_income(post_request, user):
     warehouse_type = post_request.get('warehouse_type')
     content = post_request.get('content')
-    income = Income.objects.create(warehouse_type=warehouse_type, content=content, user=user)
+    income_type = post_request.get('income_type')
+    income = Income.objects.create(warehouse_type=warehouse_type, content=content, user=user, income_type=income_type)
     return dict({'back_url': reverse(post_request.get('back_url', 'income_detail'), kwargs={'pk': income.pk}),
                  'data': ''})
 
