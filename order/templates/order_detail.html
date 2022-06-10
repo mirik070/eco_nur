@@ -48,7 +48,7 @@
                                                         class="btn btn-success">Отправить
                                                 </button>
                                             {% endif %}
-                                            {% if order.status == 'pending' %}
+                                            {% if order.status == 'pending' and request.user.is_superuser %}
                                                 <button type="button" onclick="change_order_status('accepted')"
                                                         class="btn btn-success">Принять
                                                 </button>
@@ -56,7 +56,7 @@
                                                         class="btn btn-danger mx-2">Отменить
                                                 </button>
                                             {% endif %}
-                                            {% if order.status == 'accepted' %}
+                                            {% if order.status == 'accepted' and request.user.is_superuser %}
                                                   <button type="button" onclick="change_order_status('sent')"
                                                         class="btn btn-success">Отправить клиенту
                                                 </button>
