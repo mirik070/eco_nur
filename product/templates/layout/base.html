@@ -185,7 +185,7 @@
                                     <h6>Основной</h6>
                                 </div>
                             </li>
-                            {% if request.user.is_superuser %}
+                            {% if request.user.is_superuser or request.user.user_type == 'agent' %}
                                 <li class="dropdown">
                                     <a class="nav-link menu-title" href="javascript:void(0)">
                                         <i data-feather="user"></i>
