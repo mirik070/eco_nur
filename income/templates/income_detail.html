@@ -37,7 +37,7 @@
                                         <h4>О приходе</h4>
                                     </div>
                                     <div class="col-md-6">
-                                        {% if income.status == 'created' %}
+                                        {% if income.status == 'created' and request.user.is_superuser %}
                                             <form id="id_form_income_change_status" action="{% url 'income_action' %}"
                                                   method="post">
                                                 <input type="hidden" name="action" value="change_income_status">
@@ -107,8 +107,10 @@
                                                 <th>Вес</th>
                                                 <th>Цвет</th>
                                                 <th>Кол-во</th>
-                                                <th>Цена</th>
-                                                <th>Сумма</th>
+                                                {% if request.user.is_superuser %}
+                                                    <th>Цена</th>
+                                                    <th>Сумма</th>
+                                                {% endif %}
                                                 <th>Комментарий</th>
                                                 <th>Возможности</th>
                                             </tr>
@@ -121,8 +123,10 @@
                                                     <td>{{ income_product_item.product_weight }} {{ income_product_item.product.get_unit_display }}</td>
                                                     <td>{{ income_product_item.product_color }}</td>
                                                     <td>{{ income_product_item.count|intcomma|remove_zero }}</td>
-                                                    <td>{{ income_product_item.price|intcomma|remove_zero }}</td>
-                                                    <td>{{ income_product_item.total|intcomma|remove_zero }}</td>
+                                                    {% if request.user.is_superuser %}
+                                                        <td>{{ income_product_item.price|intcomma|remove_zero }}</td>
+                                                        <td>{{ income_product_item.total|intcomma|remove_zero }}</td>
+                                                    {% endif %}
                                                     <td>{{ income_product_item.content }}</td>
                                                     <td>
                                                         {% if request.user.is_superuser %}
@@ -178,6 +182,7 @@
                                                                 </option>
                                                             </select>
                                                         </td>
+
                                                         <td>
                                                             <input type="number" id="id_count" required name="count"
                                                                    onkeyup="income_item_calculate_total()"
@@ -186,11 +191,11 @@
                                                         <td>
                                                             <input type="number" id="id_price" required name="price"
                                                                    onkeyup="income_item_calculate_total()"
-                                                                   class="form-control">
+                                                                   class="form-control {% if not request.user.is_superuser %}d-none{% endif %}">
                                                         </td>
                                                         <td>
                                                             <input type="number" id="id_total" readonly name="total"
-                                                                   class="form-control">
+                                                                   class="form-control {% if not request.user.is_superuser %}d-none{% endif %}">
                                                         </td>
                                                         <td>
                                                             <input type="text" name="content" class="form-control">
@@ -212,8 +217,10 @@
                                                 <th scope="col">#</th>
                                                 <th>Сырье</th>
                                                 <th>Кол-во</th>
-                                                <th>Цена</th>
-                                                <th>Сумма</th>
+                                                {% if request.user.is_superuser %}
+                                                    <th>Цена</th>
+                                                    <th>Сумма</th>
+                                                {% endif %}
                                                 <th>Комментарий</th>
                                                 <th>Возможности</th>
                                             </tr>
@@ -224,8 +231,10 @@
                                                     <th scope="row">{{ forloop.counter }}</th>
                                                     <td>{{ income_raw_item.raw }}</td>
                                                     <td>{{ income_raw_item.count|intcomma|remove_zero }}</td>
-                                                    <td>{{ income_raw_item.price|intcomma|remove_zero }}</td>
-                                                    <td>{{ income_raw_item.total|intcomma|remove_zero }}</td>
+                                                    {% if request.user.is_superuser %}
+                                                        <td>{{ income_raw_item.price|intcomma|remove_zero }}</td>
+                                                        <td>{{ income_raw_item.total|intcomma|remove_zero }}</td>
+                                                    {% endif %}
                                                     <td>{{ income_raw_item.content }}</td>
                                                     <td>
                                                         {% if request.user.is_superuser %}
@@ -274,11 +283,11 @@
                                                         <td>
                                                             <input type="number" id="id_price" required name="price"
                                                                    onkeyup="income_item_calculate_total()"
-                                                                   class="form-control">
+                                                                   class="form-control {% if not request.user.is_superuser %}d-none{% endif %}">
                                                         </td>
                                                         <td>
                                                             <input type="number" id="id_total" readonly name="total"
-                                                                   class="form-control">
+                                                                   class="form-control {% if not request.user.is_superuser %}d-none{% endif %}l">
                                                         </td>
                                                         <td>
                                                             <input type="text" name="content" class="form-control">
