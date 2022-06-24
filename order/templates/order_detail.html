@@ -168,12 +168,12 @@
                                                         #
                                                     </td>
                                                     <td>
-                                                        <select name="product" class="form-control select2-ex"
-                                                                required onchange="product_change_func(this)">
+                                                        <select name="product" class="form-control select2-ex" id="id_select_product"
+                                                                required onchange="product_change_func(this), get_remainder_count()">
                                                             <option disabled selected value="None">---------------
                                                             </option>
                                                             {% for product in products %}
-                                                                <option value="{{ product.id }}" data-count="{{ product.count|remove_zero }}">{{ product.title }} | {{ product.count|remove_zero }}шт.</option>
+                                                                <option value="{{ product.id }}">{{ product.title }}</option>
                                                             {% endfor %}
                                                         </select>
                                                     </td>
@@ -181,14 +181,14 @@
                                                         <select name="product_weight"
                                                                 class="form-control select2-ex"
                                                                 id="id_product_weight" required
-                                                                onchange="product_weight_change(this)">
+                                                                onchange="product_weight_change(this), get_remainder_count()">
                                                             <option disabled selected value="None">---------------
                                                             </option>
                                                         </select>
                                                     </td>
                                                     <td>
                                                         <select name="product_color" class="form-control select2-ex"
-                                                                id="id_product_color" required>
+                                                                id="id_product_color" onchange="get_remainder_count()" required>
                                                             <option disabled selected value="None">---------------
                                                             </option>
                                                         </select>
@@ -274,9 +274,46 @@
                 })
         }
 
+        async function get_remainder_count_product(url, data) {
+            let form_data = new FormData();
+            for (let key in data) {
+                form_data.append(key, data[key]);
+            }
+            const response = await fetch(url,
+                {
+                    method: 'POST',
+                    cache: "no-cache",
+                    body: form_data
+                }
+            )
+                .then(response => {
+                    return response.json();
+                })
+                .then((response_data) => {
+                    console.log(response_data)
+                    let max_count = response_data['results']['count']
+                    $('#id_count').attr('max', max_count)
+                })
+        }
+
+        function get_remainder_count() {
+            let product = $('#id_select_product').val()
+            let product_weight = $('#id_product_weight').val()
+            let product_color = $('#id_product_color').val()
+            if(product && product_weight && product_color) {
+                get_remainder_count_product('{% url 'income_action' %}',
+                {
+                    'action': 'get_remainder_count_product',
+                    'back_url': 'order_detail',
+                    'order_id': '{{ order.id }}',
+                    'product_id': product,
+                    'product_weight_id': product_weight,
+                    'product_color_id': product_color
+                })
+            }
+        }
+
         function product_change_func(select) {
-            let count = $('option:selected', select).attr('data-count');
-            $('#id_count').attr('max', count)
             get_product_weight_and_color_info('{% url 'income_action' %}',
                 {
                     'action': 'get_product_weight_and_color_info',

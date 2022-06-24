@@ -188,14 +188,15 @@
                                                                    onkeyup="income_item_calculate_total()"
                                                                    class="form-control">
                                                         </td>
-                                                        <td>
+
+                                                        <td class="{% if not request.user.is_superuser %}d-none{% endif %}">
                                                             <input type="number" id="id_price" required name="price"
                                                                    onkeyup="income_item_calculate_total()"
-                                                                   class="form-control {% if not request.user.is_superuser %}d-none{% endif %}">
+                                                                   class="form-control">
                                                         </td>
-                                                        <td>
+                                                        <td class="{% if not request.user.is_superuser %}d-none{% endif %}">
                                                             <input type="number" id="id_total" readonly name="total"
-                                                                   class="form-control {% if not request.user.is_superuser %}d-none{% endif %}">
+                                                                   class="form-control">
                                                         </td>
                                                         <td>
                                                             <input type="text" name="content" class="form-control">
@@ -271,7 +272,7 @@
                                                                 </option>
                                                                 {% for raw in raws %}
                                                                     <option value="{{ raw.id }}"
-                                                                            data-price="{{ raw.price|remove_zero }}">{{ raw.title }} {{ raw.get_unit_display }}</option>
+                                                                            data-price="{{ raw.price|remove_zero }}" data-count="{{ raw.remainder_count|remove_zero }}">{{ raw.title }} {{ raw.get_unit_display }}</option>
                                                                 {% endfor %}
                                                             </select>
                                                         </td>
@@ -280,14 +281,14 @@
                                                                    onkeyup="income_item_calculate_total()"
                                                                    class="form-control">
                                                         </td>
-                                                        <td>
+                                                        <td class="{% if not request.user.is_superuser %}d-none{% endif %}">
                                                             <input type="number" id="id_price" required name="price"
                                                                    onkeyup="income_item_calculate_total()"
-                                                                   class="form-control {% if not request.user.is_superuser %}d-none{% endif %}">
+                                                                   class="form-control ">
                                                         </td>
-                                                        <td>
+                                                        <td class="{% if not request.user.is_superuser %}d-none{% endif %}">
                                                             <input type="number" id="id_total" readonly name="total"
-                                                                   class="form-control {% if not request.user.is_superuser %}d-none{% endif %}l">
+                                                                   class="form-control ">
                                                         </td>
                                                         <td>
                                                             <input type="text" name="content" class="form-control">
@@ -324,7 +325,9 @@
 
         function product_weight_change(select) {
             let price = $('option:selected', select).attr('data-price');
+            let max_count = $('option:selected', select).attr('data-count');
             $('#id_price').val(price)
+            $('#id_count').attr('max', max_count)
         }
 
         function income_item_calculate_total() {

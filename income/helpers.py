@@ -1,3 +1,4 @@
+from django.db.models import F
 from django.http import JsonResponse
 from django.urls import reverse
 
@@ -35,6 +36,25 @@ def get_product_weight_and_color_info(post_request, user):
         })
     return dict({
         'back_url': reverse(post_request.get('back_url', 'income_list')),
+        'results': results
+    })
+
+
+def get_remainder_count_product(post_request, user):
+    order_id = post_request.get('order_id')
+    product_id = post_request.get('product_id')
+    product_weight_id = post_request.get('product_weight_id')
+    product_color_id = post_request.get('product_color_id')
+    try:
+        count = WarehouseProduct.objects.get(product_id=product_id, product_weight_id=product_weight_id,
+                                             product_color_id=product_color_id).count
+    except WarehouseProduct.DoesNotExist:
+        count = 0
+    results = {
+        'count': count
+    }
+    return dict({
+        'back_url': reverse(post_request.get('back_url', 'order_detail'), kwargs={'pk': order_id}),
         'results': results
     })
 
@@ -118,11 +138,17 @@ def change_income_status(post_request, user):
                     obj.save()
         elif income.warehouse_type == 'raw':
             income_raw_items = IncomeRawItem.objects.filter(income_id=income_id)
-            for item in income_raw_items:
-                obj, created = WarehouseRaw.objects.get_or_create(raw_id=item.raw_id, defaults={'count': item.count})
-                if not created:
-                    obj.count += item.count
-                    obj.save()
+            print(income_raw_items)
+            if income.income_type == 'outcome':
+                for item in income_raw_items:
+                    WarehouseRaw.objects.filter(raw_id=item.raw_id).update(count=F('count') - item.count)
+            else:
+                for item in income_raw_items:
+                    obj, created = WarehouseRaw.objects.get_or_create(raw_id=item.raw_id,
+                                                                      defaults={'count': item.count})
+                    if not created:
+                        obj.count += item.count
+                        obj.save()
     income.status = status
     income.save()
     return dict({

@@ -47,9 +47,7 @@ class OrderDetailView(TemplateView):
         order = Order.objects.get(id=pk)
         context['order'] = order
         context['order_items'] = OrderItem.objects.filter(order_id=pk)
-        context['products'] = Product.objects.annotate(count=Coalesce(
-            Subquery(WarehouseProduct.objects.filter(product_id=OuterRef('pk')).values('count')[:1]
-                     ), 0, output_field=IntegerField())).filter(status='active')
+        context['products'] = Product.objects.filter(status='active')
         if order.status == 'created':
             context['back_url'] = 'order_created_list'
         elif order.status == 'pending':
